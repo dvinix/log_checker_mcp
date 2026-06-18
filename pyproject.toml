@@ -6,8 +6,17 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "anthropic>=0.109.2",
+    "fastapi>=0.115.0",
     "google-genai>=2.8.0",
     "groq>=1.4.0",
+    "huggingface-hub>=1.20.0",
     "mcp>=1.28.0",
     "pydantic>=2.13.4",
+    "python-dotenv>=1.0.0",
+    "requests>=2.34.2",
+    "schedule>=1.2.2",
+    "uvicorn>=0.34.0",
 ]
+
+[tool.pyright]
+extraPaths = ["server"]
