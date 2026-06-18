@@ -14,21 +14,26 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("github-pr-mcp")
 
+from typing import Optional
+
 @mcp.tool()
-def create_fix_pr(owner: str, repo: str, fixes: list[dict], sessionId: str, baseBranch: str = None, labels: list[str] = None) -> str:
+def create_fix_pr(owner: str, repo: str, fixes: list[dict], sessionId: str, baseBranch: Optional[str] = None, labels: Optional[list[str]] = None) -> str:
     """Creates a new branch, commits fixes, and opens a GitHub Pull Request."""
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
         return json.dumps({"success": False, "error": "GITHUB_TOKEN not set"})
         
-    branch_name = f"fix/bug-{sessionId[:8]}"
+    branch_name = f"fix-bugs-{sessionId[:8]}"
+    repoRoot = os.getcwd()
     
     try:
+        remote_url = f"https://x-access-token:{token}@github.com/{owner}/{repo}.git"
+        
         # Create a branch and commit via git CLI
-        subprocess.run(["git", "checkout", "-b", branch_name], check=True, capture_output=True)
-        subprocess.run(["git", "add", "."], check=True, capture_output=True)
-        subprocess.run(["git", "commit", "-m", f"Auto-fix bugs from session {sessionId}"], check=True, capture_output=True)
-        subprocess.run(["git", "push", "-u", "origin", branch_name], check=True, capture_output=True)
+        subprocess.run(["git", "checkout", "-B", branch_name], check=True, cwd=repoRoot, capture_output=True)
+        subprocess.run(["git", "add", "."], check=True, cwd=repoRoot, capture_output=True)
+        subprocess.run(["git", "commit", "-m", f"Fix bugs from session {sessionId}"], check=False, cwd=repoRoot, capture_output=True)
+        subprocess.run(["git", "push", "-f", "-u", remote_url, branch_name], check=True, cwd=repoRoot, capture_output=True)
         
         # Create PR via GitHub API
         url = f"https://api.github.com/repos/{owner}/{repo}/pulls"

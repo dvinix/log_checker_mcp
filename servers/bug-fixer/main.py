@@ -9,14 +9,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from shared.types import BugReport, CodeFix
 
 from mcp.server.fastmcp import FastMCP
-from google import genai
+from groq import Groq
 
 mcp = FastMCP("bug-fixer-mcp")
 
 @mcp.tool()
 def fix_multiple_bugs(bugs: list[dict], repoRoot: str, dryRun: bool = False, stopOnFirstError: bool = False) -> str:
-    """Uses Gemini API Pro to generate and apply code patches."""
-    client = genai.Client() # Uses GEMINI_API_KEY from environment
+    """Uses Groq API to generate and apply code patches."""
+    client = Groq() # Uses GROQ_API_KEY from environment
     results = []
     
     for bug_dict in bugs:
@@ -66,13 +66,13 @@ Do not use markdown formatting around the JSON block. Ensure valid JSON.
             from contextlib import redirect_stdout
             import sys
             with redirect_stdout(sys.stderr):
-                response = client.models.generate_content(
-                    model='gemini-2.5-pro',
-                    contents=prompt,
-                    config={'response_mime_type': 'application/json'}
+                chat_completion = client.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model="llama-3.3-70b-versatile",
+                    response_format={"type": "json_object"},
                 )
             
-            resp_data = json.loads(response.text)
+            resp_data = json.loads(chat_completion.choices[0].message.content)
             fixed_code = resp_data.get('fixedCode', file_content)
             explanation = resp_data.get('explanation', 'No explanation provided.')
             

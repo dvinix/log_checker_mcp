@@ -27,9 +27,13 @@ def parse_logs_to_bugs(log_content: str, max_bugs: int) -> list[dict]:
             line_num = None
             # e.g., File "path/to/file.py", line 42
             m = re.search(r'File "([^"]+)", line (\d+)', line)
-            if not m and i > 0:
-                # check previous line
-                m = re.search(r'File "([^"]+)", line (\d+)', lines[i-1])
+            if not m:
+                # check previous lines
+                for j in range(1, 4):
+                    if i - j >= 0:
+                        m = re.search(r'File "([^"]+)", line (\d+)', lines[i-j])
+                        if m:
+                            break
             
             if m:
                 file_path = m.group(1)

@@ -16,10 +16,17 @@ async def run():
             print("Orchestrator initialized. Calling check_logs...")
             result = await session.call_tool("check_logs", arguments={
                 "repoRoot": "d:\\log_checker_mcp",
-                "githubOwner": "testowner",
-                "githubRepo": "testrepo",
-                "logContent": "File \"bad_file.py\", line 2\nZeroDivisionError: division by zero",
-                "dryRun": True
+                "githubOwner": "dvinix",
+                "githubRepo": "log_checker_mcp",
+                "logContent": """Traceback (most recent call last):
+  File "D:\\log_checker_mcp\\calculator.py", line 6, in <module>
+    print("Division:", divide(10, 0))
+                       ^^^^^^^^^^^^^
+  File "D:\\log_checker_mcp\\calculator.py", line 3, in divide
+    return a / b
+           ~~^~~
+ZeroDivisionError: division by zero""",
+                "dryRun": False
             })
             
             for content in result.content:
